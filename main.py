@@ -6,6 +6,7 @@ import random
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('target', type=str)
 arg_parser.add_argument('-s', '--size', type=int, default=20)
+arg_parser.add_argument('-t', '--type', type=str, default='point')
 
 LAT_RANGE = range(-90, 91)
 LON_RANGE = range(-180, 181)
@@ -18,14 +19,14 @@ def randomString(characters):
 
     return new_str
 
-def randomPoint():
+def randomCoord():
     return (random.choice(LON_RANGE), random.choice(LAT_RANGE))
 
 def randomLine(length):
     coords = []
 
     for i in range(length):
-        coords.append(randomPoint())
+        coords.append(randomCoord())
 
     return coords
 
@@ -35,7 +36,17 @@ def main() :
     kml = simplekml.Kml(name=arguments.target)
 
     for i in range(arguments.size):
-        kml.newlinestring(name=randomString(10), description=randomString(30), coords=randomLine(int(100 * random.random())))
+        if arguments.type == 'point':
+            point = kml.newpoint(name=randomString(10), description=randomString(30), coords=[randomCoord()])
+        
+        elif arguments.type == 'line':
+            line = kml.newlinestring(name=randomString(10), description=randomString(30), coords=randomLine(int(100 * random.random())))
+            line.style.linestyle.color = simplekml.Color.red
+            line.style.linestyle.width = 10
+        
+        else:
+            print('Not a valid type.')
+            return
 
     kml.save(arguments.target + '.kml')
 
